@@ -2,10 +2,16 @@
   "Small garph operations lib"
   {:author "Roman Dronov"})
 
-(def G {:1 [:2 :3]
-        :2 [:4]
-        :3 [:4]
+(def G {:1 ['(:2 2) '(:3 4)]
+        :2 ['(:4 5)]
+        :3 ['(:4 2)]
         :4 []})
+
+(defn v-neighbors
+  [g v]
+  (->> (g v)
+       (map #(first %))
+       vec))
 
 (defn seq-graph
   [d g s]
@@ -14,7 +20,7 @@
       (if (empty? frontier)
         nil
         (let [v (peek frontier)
-              neighbors (g v)]
+              neighbors (v-neighbors g v)]
           (cons v (rec-seq
                    (into explored neighbors)
                    (into (pop frontier) (remove explored neighbors))))))))
