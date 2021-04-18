@@ -32,7 +32,14 @@
 (seq-graph-dfs G :1) ; => (:1 :3 :4 :2)
 (seq-graph-bfs G :1) ; => (:1 :2 :3 :4)
 
-(defn generate
+;; 2 -- Make Random Graph
+
+(defn make-graph
+  "Input:
+    N - size of generated graph
+    S - sparseness (number of directed edges actually; from N-1 (inclusive) to N(N-1) (inclusive))
+  Output:
+    simple connected graph G(n,s) with N vertices and S edges"
   [n s]
   (if-not (and (int? n) (> n 0))
     (throw (RuntimeException. "Vertices count should be natural number")))
@@ -47,3 +54,26 @@
                (map (fn [e] [e []]))
                (into {}))]
     g))
+
+;; 3 -- dijkstra's shortest path
+
+(defn ^:private shortest-for-v
+  [frontier paths u m]
+  (loop [v frontier]
+    (if (empty? frontier)
+      u
+      (recur []))))
+
+(defn shortest-path
+  [graph source destination]
+  (loop [frontier (keys graph)
+         path {:1 ##Inf :2 ##Inf :3 ##Inf}]
+    (if (empty? frontier)
+      path
+      (let [u -1 ;; find U. U is a Vertex which will be revoed before next loop iteration
+            m ##Inf ;; this m will be minified on each iteration for every frontier vertex
+            v (peek frontier)
+            neighbors (v graph)]
+        (recur
+         (pop frontier)
+         path)))))
