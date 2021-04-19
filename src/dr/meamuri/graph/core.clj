@@ -2,15 +2,16 @@
   "Small garph operations lib"
   {:author "Roman Dronov"})
 
-(def G {:1 ['(:2 2) '(:3 4)]
-        :2 ['(:4 5)]
-        :3 ['(:4 2)]
+;; v means vertex, w means weight
+(def G {:1 [{:v :2 :w 2} {:v :3 :w 3}]
+        :2 [{:v 4 :w 4}]
+        :3 [{:v 4 :w 1}]
         :4 []})
 
 (defn v-neighbors
   [g v]
   (->> (g v)
-       (map #(first %))
+       (map #(:v %))
        vec))
 
 (defn seq-graph
@@ -74,16 +75,45 @@
          u*
          m*)))))
 
+(defn ^:private compute-next-paths
+  [graph frontier u path]
+  (loop [frontier* frontier
+         path* path]
+    (if (empty? frontier*)
+      path*
+      (let [v (peek frontier*)
+            left (get path* u ##Inf)
+            right (or (->> graph
+                           v
+                           (filter #(= (:v %) u))
+                           first
+                           :w) ##Inf)
+            curr (get path* v ##Inf)
+            p (min curr (+ left right))]
+        (recur
+         (pop frontier*)
+         (assoc path* v p))))))
+
 (defn shortest-path
   [graph source destination]
-  (loop [frontier (keys graph)
-         path {:1 ##Inf :2 ##Inf :3 ##Inf}]
-    (if (empty? frontier)
-      path
-      (let [u -1 ;; find U. U is a Vertex which will be revoed before next loop iteration
-            m ##Inf ;; this m will be minified on each iteration for every frontier vertex
-            v (peek frontier)
-            neighbors (v graph)]
-        (recur
-         (pop frontier)
-         path)))))
+  (let [frontier* (-> graph
+                      (dissoc source)
+                      keys
+                      vec)
+        from-source-paths (->> graph
+                               source
+                               (map (fn [e] {(:v e) (:w e)}))
+                               vec)
+        paths (apply merge {source 0} from-source-paths)]
+    (loop [path paths
+           frontier frontier*]
+      (if (empty? frontier)
+        path
+        (let [u (shortest-v frontier path)
+              fr* (->> frontier
+                       (remove #(= % u))
+                       vec)
+              p* (compute-next-paths graph fr* u path)]
+          (recur
+           (assoc path u p*)
+           fr*))))))
