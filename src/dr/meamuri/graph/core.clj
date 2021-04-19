@@ -57,12 +57,22 @@
 
 ;; 3 -- dijkstra's shortest path
 
-(defn ^:private shortest-for-v
-  [frontier paths u m]
-  (loop [v frontier]
-    (if (empty? frontier)
+(defn ^:private shortest-v
+  [frontier paths]
+  (loop [frontier* frontier
+         u -1
+         m ##Inf]
+    (if (empty? frontier*)
       u
-      (recur []))))
+      (let [v (peek frontier*)
+            weight (get paths v ##Inf)
+            [u* m*] (if (< weight m)
+                      [v weight]
+                      [u m])]
+        (recur
+         (pop frontier*)
+         u*
+         m*)))))
 
 (defn shortest-path
   [graph source destination]
