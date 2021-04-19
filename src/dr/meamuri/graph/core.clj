@@ -4,8 +4,8 @@
 
 ;; v means vertex, w means weight
 (def G {:1 [{:v :2 :w 2} {:v :3 :w 3}]
-        :2 [{:v 4 :w 4}]
-        :3 [{:v 4 :w 1}]
+        :2 [{:v :4 :w 4}]
+        :3 [{:v :4 :w 1}]
         :4 []})
 
 (defn v-neighbors
@@ -67,7 +67,7 @@
       u
       (let [v (peek frontier*)
             weight (get paths v ##Inf)
-            [u* m*] (if (< weight m)
+            [u* m*] (if (or (= -1 u) (< weight m))
                       [v weight]
                       [u m])]
         (recur
@@ -84,8 +84,8 @@
       (let [v (peek frontier*)
             left (get path* u ##Inf)
             right (or (->> graph
-                           v
-                           (filter #(= (:v %) u))
+                           u
+                           (filter #(= (:v %) v))
                            first
                            :w) ##Inf)
             curr (get path* v ##Inf)
@@ -115,5 +115,5 @@
                        vec)
               p* (compute-next-paths graph fr* u path)]
           (recur
-           (assoc path u p*)
+           p*
            fr*))))))
