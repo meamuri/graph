@@ -8,6 +8,14 @@
         :3 [{:v :4 :w 1}]
         :4 []})
 
+(def test-g
+  {:1 [{:v :2, :w 1} {:v :5, :w 102} {:v :4, :w 12}]
+   :2 [{:v :3, :w 100} {:v :6, :w 50}]
+   :3 [{:v :4, :w 1}]
+   :4 []
+   :5 [{:v :4, :w 5}]
+   :6 [{:v :3, :w 1}]})
+
 (defn v-neighbors
   [g v]
   (->> (g v)
@@ -66,7 +74,7 @@
     (if (empty? frontier*)
       u
       (let [v (peek frontier*)
-            weight (get paths v ##Inf)
+            weight (get-in paths [v :w] ##Inf)
             [u* m*] (if (or (= -1 u) (< weight m))
                       [v weight]
                       [u m])]
@@ -75,6 +83,13 @@
          u*
          m*)))))
 
+(defn path-node-update
+  [w* node]
+  (fn [e]
+    (-> e
+        (assoc :w w*)
+        (update :p #(conj % node)))))
+
 (defn ^:private compute-next-paths
   [graph frontier u path]
   (loop [frontier* frontier
@@ -82,17 +97,17 @@
     (if (empty? frontier*)
       path*
       (let [v (peek frontier*)
-            left (get path* u ##Inf)
+            left (get-in path* [u :w] ##Inf)
             right (or (->> graph
                            u
                            (filter #(= (:v %) v))
                            first
                            :w) ##Inf)
-            curr (get path* v ##Inf)
+            curr (get-in path* [v :w] ##Inf)
             p (min curr (+ left right))]
         (recur
          (pop frontier*)
-         (assoc path* v p))))))
+         (update path* v (path-node-update p u)))))))
 
 (defn shortest-path
   [graph source destination]
@@ -102,9 +117,12 @@
                       vec)
         from-source-paths (->> graph
                                source
-                               (map (fn [e] {(:v e) (:w e)}))
+                               (map (fn [e] {(:v e) {:w (:w e)
+                                                     :p [source]}}))
                                vec)
-        paths (apply merge {source 0} from-source-paths)]
+        source-description {source {:w 0
+                                    :p []}}
+        paths (apply merge source-description from-source-paths)]
     (loop [path paths
            frontier frontier*]
       (if (empty? frontier)
