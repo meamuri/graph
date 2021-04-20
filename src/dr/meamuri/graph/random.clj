@@ -1,10 +1,35 @@
 (ns dr.meamuri.graph.random
   "Make Random Graph"
-  {:author "Roman Dronov"})
+  {:author "Roman Dronov"}
+  (:require [clojure.set :refer [difference]]))
+
+(defn ^:private nodes-to-rels
+  [nodes]
+  (->> nodes
+       (map (fn [node]
+              (:v node)))
+       set))
+
+(defn ^:private completed?
+  [verticles]
+  (fn [[source-node nodes]]
+    (let [rels (nodes-to-rels nodes)]
+      (= (difference verticles rels) #{source-node}))))
 
 (defn ^:private randomize-additional-links
-  [g s verticles]
-  g)
+  [graph sparseness verticles]
+  (let [non-completed (->> graph
+                           (filter (completed? verticles))
+                           (map #(first %))
+                           vec)]
+    (loop [g graph
+           s sparseness]
+      (if (= s 0)
+        g
+        (let []
+          (recur
+           g
+           (dec s)))))))
 
 (defn make-graph
   "Input:
@@ -33,7 +58,7 @@
            connected [(first randomized)]
            unlinked (-> randomized rest vec)]
       (if (empty? unlinked)
-        (randomize-additional-links g sparseness verticles)
+        (randomize-additional-links g sparseness (set verticles))
         (let [from (rand-nth connected)
               to (rand-nth unlinked)
               weight (rand-int 100)
