@@ -36,12 +36,14 @@
                                      ##Inf)
             expected-update (+ current-weight peeked-vertex-weight)
             curr (get-in path [vertex :w] ##Inf)
-            p (min curr expected-update)]
+            p (min curr expected-update)
+            with-uodated-previous (if (not= curr p)
+                                    (assoc-in path [vertex :p] shortest-path-vertex)
+                                    path)]
         (recur
          (pop frontier)
-         (-> path
-             (assoc-in [vertex :w] p)
-             (assoc-in [vertex :p] shortest-path-vertex)))))))
+         (-> with-uodated-previous
+             (assoc-in [vertex :w] p)))))))
 
 (defn ^:private dijkstra
   [graph source]
