@@ -10,25 +10,31 @@
               (:v node)))
        set))
 
-(defn ^:private completed?
+(defn ^:private to-sets
   [verticles]
   (fn [[source-node nodes]]
     (let [rels (nodes-to-rels nodes)]
-      (= (difference verticles rels) #{source-node}))))
+      [source-node (difference verticles (conj rels source-node))])))
 
 (defn ^:private randomize-additional-links
   [graph sparseness verticles]
-  (let [non-completed (->> graph
-                           (filter (completed? verticles))
-                           (map #(first %))
-                           vec)]
+  (let [sets-computation (to-sets verticles)]
     (loop [g graph
            s sparseness]
       (if (= s 0)
         g
-        (let []
+        (let [uncompleted (->> graph
+                               (map sets-computation)
+                               (filter #(-> % second seq))
+                               (into {}))
+              from (rand-nth (keys uncompleted))
+              to (-> uncompleted from vec rand-nth)
+              weight (rand-int 100)
+              node {:v to
+                    :w weight}
+              g* (update g from #(conj % node))]
           (recur
-           g
+           g*
            (dec s)))))))
 
 (defn make-graph
