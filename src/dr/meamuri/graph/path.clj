@@ -20,31 +20,28 @@
          v
          w)))))
 
-(defn path-node-update
-  [w* node]
-  (fn [e]
-    (-> e
-        (assoc :w w*)
-        (assoc :p node))))
-
 (defn ^:private compute-next-paths
-  [graph frontier u path]
-  (loop [frontier* frontier
-         path* path]
-    (if (empty? frontier*)
-      path*
-      (let [v (peek frontier*)
-            left (get-in path* [u :w] ##Inf)
-            right (or (->> graph
-                           u
-                           (filter #(= (:v %) v))
-                           first
-                           :w) ##Inf)
-            curr (get-in path* [v :w] ##Inf)
-            p (min curr (+ left right))]
+  [graph verticles-for-discovery shortest-path-vertex current-path]
+  (loop [frontier verticles-for-discovery
+         path current-path]
+    (if (empty? frontier)
+      path
+      (let [vertex (peek frontier)
+            current-weight (get-in path [shortest-path-vertex :w] ##Inf)
+            peeked-vertex-weight (or (->> graph
+                                          shortest-path-vertex
+                                          (filter #(= (:v %) vertex))
+                                          first
+                                          :w)
+                                     ##Inf)
+            expected-update (+ current-weight peeked-vertex-weight)
+            curr (get-in path [vertex :w] ##Inf)
+            p (min curr expected-update)]
         (recur
-         (pop frontier*)
-         (update path* v (path-node-update p u)))))))
+         (pop frontier)
+         (-> path
+             (assoc-in [vertex :w] p)
+             (assoc-in [vertex :p] shortest-path-vertex)))))))
 
 (defn ^:private dijkstra
   [graph source]
