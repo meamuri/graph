@@ -2,15 +2,16 @@
   "Small garph operations lib"
   {:author "Roman Dronov"})
 
-(def G {:1 ['(:2 2) '(:3 4)]
-        :2 ['(:4 5)]
-        :3 ['(:4 2)]
+;; v means vertex, w means weight
+(def G {:1 [{:v :2 :w 2} {:v :3 :w 3}]
+        :2 [{:v :4 :w 4}]
+        :3 [{:v :4 :w 1}]
         :4 []})
 
 (defn v-neighbors
   [g v]
   (->> (g v)
-       (map #(first %))
+       (map #(:v %))
        vec))
 
 (defn seq-graph
@@ -31,19 +32,3 @@
 
 (seq-graph-dfs G :1) ; => (:1 :3 :4 :2)
 (seq-graph-bfs G :1) ; => (:1 :2 :3 :4)
-
-(defn generate
-  [n s]
-  (if-not (and (int? n) (> n 0))
-    (throw (RuntimeException. "Vertices count should be natural number")))
-  (let [min (- n 1)
-        max (* n min)]
-    (when (or (not (int? s)) (< s min) (> s max))
-      (throw (RuntimeException. "Sparseness should be between (n - 1) and n * (n - 1)"))))
-  (let [g (->> (range)
-               (take n)
-               (map #(+ 1 %))
-               (map #(-> % str keyword))
-               (map (fn [e] [e []]))
-               (into {}))]
-    g))
