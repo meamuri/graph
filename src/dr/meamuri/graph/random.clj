@@ -2,6 +2,10 @@
   "Make Random Graph"
   {:author "Roman Dronov"})
 
+(defn randomize-additional-links
+  [g s verticles]
+  g)
+
 (defn make-graph
   "Input:
     N - size of generated graph
@@ -15,10 +19,27 @@
         max (* n min)]
     (when (or (not (int? s)) (< s min) (> s max))
       (throw (RuntimeException. "Sparseness should be between (n - 1) and n * (n - 1)"))))
-  (let [g (->> (range)
-               (take n)
-               (map #(+ 1 %))
-               (map #(-> % str keyword))
-               (map (fn [e] [e []]))
-               (into {}))]
-    g))
+  (let [verticles (->> (range)
+                       (take n)
+                       (map #(+ 1 %))
+                       (map #(-> % str keyword))
+                       vec)
+        randomized (shuffle verticles)
+        graph (->> verticles
+                   (map (fn [e] [e []]))
+                   (into {}))]
+    (loop [sparseness s
+           g graph
+           connected [(first randomized)]
+           unlinked (-> randomized rest vec)]
+      (if (empty? unlinked)
+        (randomize-additional-links g sparseness verticles)
+        (let [from (rand-nth connected)
+              to (rand-nth unlinked)
+              weight (rand-int 100)
+              node {:v to :w weight}]
+          (recur
+           (dec 1)
+           (update g from #(conj % node)) ;; Update randomly peeked v
+           (conj connected to)
+           (->> unlinked (remove #(= % to)) vec)))))))
