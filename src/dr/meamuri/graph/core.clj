@@ -88,7 +88,7 @@
   (fn [e]
     (-> e
         (assoc :w w*)
-        (update :p #(conj % node)))))
+        (assoc :p node))))
 
 (defn ^:private compute-next-paths
   [graph frontier u path]
@@ -109,8 +109,8 @@
          (pop frontier*)
          (update path* v (path-node-update p u)))))))
 
-(defn shortest-path
-  [graph source destination]
+(defn ^:private dijkstra
+  [graph source]
   (let [frontier* (-> graph
                       (dissoc source)
                       keys
@@ -118,10 +118,10 @@
         from-source-paths (->> graph
                                source
                                (map (fn [e] {(:v e) {:w (:w e)
-                                                     :p [source]}}))
+                                                     :p source}}))
                                vec)
         source-description {source {:w 0
-                                    :p []}}
+                                    :p nil}}
         paths (apply merge source-description from-source-paths)]
     (loop [path paths
            frontier frontier*]
@@ -135,3 +135,20 @@
           (recur
            p*
            fr*))))))
+
+(defn ^:private fold-destination
+  [paths source destination]
+  (loop [r []
+         k destination]
+    (if (= source k)
+      (conj r source)
+      (recur
+       (conj r k)
+       (:p (k paths))))))
+
+(defn shortest-path
+  [graph source destination]
+  (-> graph
+      (dijkstra source)
+      (fold-destination source destination)
+      reverse))
