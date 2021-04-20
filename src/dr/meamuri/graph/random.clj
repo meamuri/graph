@@ -2,7 +2,7 @@
   "Make Random Graph"
   {:author "Roman Dronov"})
 
-(defn randomize-additional-links
+(defn ^:private randomize-additional-links
   [g s verticles]
   g)
 

@@ -1,5 +1,6 @@
 (ns user
-  (:require [dr.meamuri.graph.path :refer [shortest-path]]))
+  (:require [dr.meamuri.graph.path :refer [shortest-path]]
+            [dr.meamuri.graph.random :refer [make-graph]]))
 
 (def Graph {:1 [{:v :2, :w 1} {:v :5, :w 102} {:v :4, :w 12}]
             :2 [{:v :3, :w 100} {:v :6, :w 50}]
@@ -36,5 +37,10 @@
   ((fn []
      (-> G
          (shortest-path :1 :4)
+         str
+         println)))
+  ((fn []
+     (-> (make-graph 5 7)
+         (shortest-path :1 :6)
          str
          println))))
