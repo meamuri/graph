@@ -1,13 +1,7 @@
 (ns user
   (:require [dr.meamuri.graph.path :refer [shortest-path]]
-            [dr.meamuri.graph.random :refer [make-graph]]))
-
-(def Graph {:1 [{:v :2, :w 1} {:v :5, :w 102} {:v :4, :w 12}]
-            :2 [{:v :3, :w 100} {:v :6, :w 50}]
-            :3 [{:v :4, :w 1}]
-            :4 []
-            :5 [{:v :4, :w 5}]
-            :6 [{:v :3, :w 1}]})
+            [dr.meamuri.graph.random :refer [make-graph]]
+            [dr.meamuri.graph.ops :refer [eccentricity diameter radius]]))
 
 ;;
 ;;
@@ -36,11 +30,20 @@
 (comment
   ((fn []
      (-> G
-         (shortest-path :1 :4)
-         str
-         println)))
+         (shortest-path :1 :4))))
   ((fn []
      (-> (make-graph 5 7)
-         (shortest-path :1 :6)
-         str
-         println))))
+         (shortest-path :1 :4))))
+
+  (#(-> (make-graph 3 4)
+        (eccentricity :1)))
+
+  (#(let [g (make-graph 5 12)
+          d (diameter g)]
+      (println (str "Graph is " g))
+      (println (str "Diameter for graph is " d))))
+
+  (#(let [g (make-graph 3 4)
+          r (radius g)]
+      (println (str "Graph is " g))
+      (println (str "Radius for graph is " r)))))
