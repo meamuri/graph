@@ -1,6 +1,7 @@
 (ns user
   (:require [dr.meamuri.graph.path :refer [shortest-path]]
-            [dr.meamuri.graph.random :refer [make-graph]]))
+            [dr.meamuri.graph.random :refer [make-graph]]
+            [dr.meamuri.graph.ops :refer [eccentricity diameter radius]]))
 
 ;;
 ;;
@@ -32,4 +33,13 @@
          (shortest-path :1 :4))))
   ((fn []
      (-> (make-graph 5 7)
-         (shortest-path :1 :4)))))
+         (shortest-path :1 :4))))
+
+  (#(-> (make-graph 3 4)
+        (eccentricity :1)))
+
+  (#(-> (make-graph 3 4)
+        diameter))
+
+  (#(-> (make-graph 3 4)
+        radius)))
