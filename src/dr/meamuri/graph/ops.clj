@@ -22,9 +22,43 @@
 (defn radius
   "The radius of a graph is the minimum eccentricity of any vertex in a graph."
   [graph]
-  0)
+  (let [traverser
+        (fn rec-search
+          [explored frontier acc]
+          (if (empty? frontier)
+            acc
+            (let [vertex (peek frontier)
+                  neighbors (->> graph
+                                 vertex
+                                 (map #(:v %))
+                                 vec)
+                  new-min (eccentricity graph vertex)]
+              (rec-search
+               (into explored neighbors)
+               (into (pop frontier) (remove explored neighbors))
+               (min new-min acc)))))
+        s (-> graph keys first)
+        d (clojure.lang.PersistentQueue/EMPTY)]
+    (traverser #{s} (conj d s) ##Inf)))
 
 (defn diameter
   "The diameter of a graph is the maximum eccentricity of any vertex in a graph."
   [graph]
-  0)
+  (let [traverser
+        (fn rec-search
+          [explored frontier acc]
+          (if (empty? frontier)
+            acc
+            (let [vertex (peek frontier)
+                  neighbors (->> graph
+                                 vertex
+                                 (map #(:v %))
+                                 vec)
+                  new-max (eccentricity graph vertex)]
+              (rec-search
+               (into explored neighbors)
+               (into (pop frontier) (remove explored neighbors))
+               (max new-max acc)))))
+        s (-> graph keys first)
+        d (clojure.lang.PersistentQueue/EMPTY)]
+    (traverser #{s} (conj d s) 0)))

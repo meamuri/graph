@@ -38,8 +38,12 @@
   (#(-> (make-graph 3 4)
         (eccentricity :1)))
 
-  (#(-> (make-graph 3 4)
-        diameter))
+  (#(let [g (make-graph 5 12)
+          d (diameter g)]
+      (println (str "Graph is " g))
+      (println (str "Diameter for graph is " d))))
 
-  (#(-> (make-graph 3 4)
-        radius)))
+  (#(let [g (make-graph 3 4)
+          r (radius g)]
+      (println (str "Graph is " g))
+      (println (str "Radius for graph is " r)))))
