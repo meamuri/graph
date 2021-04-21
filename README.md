@@ -128,11 +128,11 @@ Please re-acquaint yourself with graph distance properties https://en.wikipedia.
 
 I should be able to write something like this:
 
+```clojure
 (def random-graph (make-graph 10 10))
 
 (eccentricity random-graph (first (keys random-graph))) ; => number expressing eccentricity for `first` vertex in random-graph
 
-```clojure
 (radius random-graph) ; => minimal eccentricity
 (diameter random-graph) ; => maximal eccentricity
 ```

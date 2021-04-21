@@ -73,14 +73,17 @@
            frontier*))))))
 
 (defn ^:private fold-path
-  [paths destination]
-  (loop [shortest-path '()
-         previous-vertex destination]
-    (if (= previous-vertex nil)
-      shortest-path
-      (recur
-       (conj shortest-path previous-vertex)
-       (:p (previous-vertex paths))))))
+  [paths source destination]
+  (loop [shortest-path (list destination)
+         vertex destination]
+    (let [previous (:p (vertex paths))
+          paths* (conj shortest-path previous)]
+      (condp = previous
+        nil '()
+        source paths*
+        (recur
+         paths*
+         previous)))))
 
 (defn shortest-path
   "An implementation of Dijkstra's algorithm 
@@ -89,4 +92,4 @@
   [graph source destination]
   (-> graph
       (dijkstra source)
-      (fold-path destination)))
+      (fold-path source destination)))
