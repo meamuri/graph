@@ -3,70 +3,51 @@
   {:author "Roman Dronov"}
   (:require [dr.meamuri.graph.path :refer [shortest-path]]))
 
+(defn make-traverser
+  [graph source updater picker]
+  (fn rec-search
+    [explored frontier acc]
+    (if (empty? frontier)
+      acc
+      (let [vertex (peek frontier)
+            neighbors (->> graph
+                           vertex
+                           (map #(:v %))
+                           vec)
+            new-acc (picker graph source vertex)]
+        (rec-search
+         (into explored neighbors)
+         (into (pop frontier) (remove explored neighbors))
+         (updater new-acc acc))))))
+
 (defn eccentricity
   "The eccentricity of a vertex v is defined as the greatest distance between v and any other vertex."
   [graph source]
-  (let [traverser
-        (fn rec-search
-          [explored frontier acc]
-          (if (empty? frontier)
-            acc
-            (let [vertex (peek frontier)
-                  neighbors (->> graph
-                                 vertex
-                                 (map #(:v %))
-                                 vec)
-                  new-acc (-> graph
-                              (shortest-path source vertex)
-                              count
-                              dec)]
-              (rec-search
-               (into explored neighbors)
-               (into (pop frontier) (remove explored neighbors))
-               (max new-acc acc)))))
+  (let [picker (fn [g source vertex]
+                 (-> g
+                     (shortest-path source vertex)
+                     count
+                     dec))
+        traverser (make-traverser graph source picker max)
         d (clojure.lang.PersistentQueue/EMPTY)]
     (traverser #{source} (conj d source) 0)))
 
 (defn radius
   "The radius of a graph is the minimum eccentricity of any vertex in a graph."
   [graph]
-  (let [traverser
-        (fn rec-search
-          [explored frontier acc]
-          (if (empty? frontier)
-            acc
-            (let [vertex (peek frontier)
-                  neighbors (->> graph
-                                 vertex
-                                 (map #(:v %))
-                                 vec)
-                  new-min (eccentricity graph vertex)]
-              (rec-search
-               (into explored neighbors)
-               (into (pop frontier) (remove explored neighbors))
-               (min new-min acc)))))
-        s (-> graph keys first)
+  (let [source (-> graph keys first)
+        picker (fn [g _ vertex]
+                 (eccentricity g vertex))
+        traverser (make-traverser graph source min picker)
         d (clojure.lang.PersistentQueue/EMPTY)]
-    (traverser #{s} (conj d s) ##Inf)))
+    (traverser #{source} (conj d source) ##Inf)))
 
 (defn diameter
   "The diameter of a graph is the maximum eccentricity of any vertex in a graph."
   [graph]
-  (let [traverser
-        (fn rec-search
-          [explored frontier acc]
-          (if (empty? frontier)
-            acc
-            (let [vertex (peek frontier)
-                  neighbors (->> graph
-                                 vertex
-                                 (map #(:v %))
-                                 vec)
-                  new-max (eccentricity graph vertex)]
-              (rec-search
-               (into explored neighbors)
-               (into (pop frontier) (remove explored neighbors))
-               (max new-max acc)))))
-        s (-> graph keys first)
+  (let [source (-> graph keys first)
+        picker (fn [g _ vertex]
+                 (eccentricity g vertex))
+        traverser (make-traverser graph source max picker)
         d (clojure.lang.PersistentQueue/EMPTY)]
-    (traverser #{s} (conj d s) 0)))
+    (traverser #{source} (conj d source) 0)))
