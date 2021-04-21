@@ -35,15 +35,17 @@
      (-> (make-graph 5 7)
          (shortest-path :1 :4))))
 
-  (#(-> (make-graph 3 4)
-        (eccentricity :1)))
+  (#(let [g (make-graph 4 7)
+          e (eccentricity g :1)]
+      (println (str "Graph is " g))
+      (println (str "Eccentricity for graph is " e))))
 
   (#(let [g (make-graph 5 12)
           d (diameter g)]
       (println (str "Graph is " g))
       (println (str "Diameter for graph is " d))))
 
-  (#(let [g (make-graph 3 4)
+  (#(let [g (make-graph 5 10)
           r (radius g)]
       (println (str "Graph is " g))
       (println (str "Radius for graph is " r)))))

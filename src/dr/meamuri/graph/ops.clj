@@ -6,18 +6,26 @@
 (defn eccentricity
   "The eccentricity of a vertex v is defined as the greatest distance between v and any other vertex."
   [graph source]
-  (let [verticles (-> graph (dissoc source) keys vec)]
-    (loop [frontier verticles
-           greatest 0]
-      (if (empty? frontier)
-        (max (dec greatest) 0)
-        (let [v (peek frontier)
-              distance (-> graph
-                           (shortest-path source v)
-                           count)]
-          (recur
-           (pop frontier)
-           (max greatest distance)))))))
+  (let [traverser
+        (fn rec-search
+          [explored frontier acc]
+          (if (empty? frontier)
+            acc
+            (let [vertex (peek frontier)
+                  neighbors (->> graph
+                                 vertex
+                                 (map #(:v %))
+                                 vec)
+                  new-acc (-> graph
+                              (shortest-path source vertex)
+                              count
+                              dec)]
+              (rec-search
+               (into explored neighbors)
+               (into (pop frontier) (remove explored neighbors))
+               (max new-acc acc)))))
+        d (clojure.lang.PersistentQueue/EMPTY)]
+    (traverser #{source} (conj d source) 0)))
 
 (defn radius
   "The radius of a graph is the minimum eccentricity of any vertex in a graph."
