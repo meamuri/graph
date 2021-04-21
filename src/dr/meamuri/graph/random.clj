@@ -70,7 +70,7 @@
               weight (rand-int 100)
               node {:v to :w weight}]
           (recur
-           (dec 1)
+           (dec sparseness)
            (update g from #(conj % node)) ;; Update randomly peeked v
            (conj connected to)
            (->> unlinked (remove #(= % to)) vec)))))))
