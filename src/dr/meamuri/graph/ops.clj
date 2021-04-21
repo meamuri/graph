@@ -28,7 +28,7 @@
                      (shortest-path source vertex)
                      count
                      dec))
-        traverser (make-traverser graph source picker max)
+        traverser (make-traverser graph source max picker)
         d (clojure.lang.PersistentQueue/EMPTY)]
     (traverser #{source} (conj d source) 0)))
 
