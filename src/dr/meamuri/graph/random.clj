@@ -23,7 +23,7 @@
            s sparseness]
       (if (= s 0)
         g
-        (let [uncompleted (->> graph
+        (let [uncompleted (->> g
                                (map sets-computation)
                                (filter #(-> % second seq))
                                (into {}))
