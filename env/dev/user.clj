@@ -18,6 +18,16 @@
    :4 []
    :5 [{:v :4 :w 2}]})
 
+(def lg
+  {:1 [{:v :2 :w 1} {:v :8 :w 1} {:v :7 :w 2}]
+   :2 [{:v :3 :w 5} {:v :4 :w 2} {:v :1 :w 4}]
+   :3 [{:v :2 :w 1}]
+   :4 [{:v :6 :w 17} {:v :5 :w 1}]
+   :5 [{:v :6 :w 2}]
+   :6 [{:v :3 :w 5}]
+   :7 []
+   :8 []})
+
 (comment
   (seq-graph-dfs G* :1)
   (seq-graph-bfs G* :1)
@@ -38,4 +48,6 @@
       (println (str "Graph is " g))
       (println (str "Eccentricity for graph is " e))
       (println (str "Diameter for graph is " d))
-      (println (str "Radius for graph is " r)))))
+      (println (str "Radius for graph is " r))))
+
+  (#(eccentricity lg :2)))

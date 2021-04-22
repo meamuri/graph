@@ -38,7 +38,11 @@
   (let [source (-> graph keys first)
         picker (fn [g _ vertex]
                  (eccentricity g vertex))
-        traverser (make-traverser graph source min picker)
+        updated (fn [acc new-acc]
+                  (-> acc
+                      (min new-acc)
+                      (max 1)))
+        traverser (make-traverser graph source updated picker)
         d (clojure.lang.PersistentQueue/EMPTY)]
     (traverser #{source} (conj d source) ##Inf)))
 
